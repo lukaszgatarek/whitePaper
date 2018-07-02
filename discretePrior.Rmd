@@ -1,0 +1,144 @@
+---
+title: 'Post 3: Discrete priors'
+date: "10 august 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In the previous post we have discussed the process of updating prior distribution with the information from the likelihood (observations). Today we would like to deepen this matter, but we abandon for a while the Normal distribution and the regression context. We will get back to it soon, but I think it is important to understand the process of adaptation of prior information to the model. In many up-to-date application, in particular in artificial intelligence, there is a lot of discussion about joining observations from many different datasets, coming from different sensors into one set. This trend, although it seems to be a hot topic in data science nowadays, has its long history. In filtering for time series estimation, the distribution of parameter that we have filtered yesterday becomes a prior of today and so on. The same thing is actually going on in merging observations brought but many subjects into one density. This means that the observations made by one person, and their resulting distribution, can be interpreted as a prior for the inference using data delivered by another individuum. Similarly for sensors, we can combine together information form one sensor with another one by simply treating one subject as a prior for another one. This process can be infinitely long and can span in dimension of time and cross-objects. 
+
+What is important at this stage is to understand how the observations made by one object can be treated as a starting point, a prior, for inference with respect to another object behavior, so that in the end we can infer based on the combination. 
+
+To present this idea we will abstract for a while from Normal distribution and we work with beta distribution which is much simpler than Normal distribution in terms of its mathematical form.
+
+The beta distribution is a convenient family of distributions for modeling a proprtion. It can be a different type of proportion. Proportion of women in the population, proportion of assets to fall in terms of value in the stock exchange, proportion of customers who has been directed to a company website from search engine... Examples can be multiplied. In general the more and more uncertainty in the economic systems, the more business analytics managers know that the proportion should be interpreted in terms of its potential span, taking into account the underlying stochasticity, and not in terms of one given value. Thats why we need the beta distribution.
+
+Apart from some normalizing constants, that we can throw away for the time being, the beta density for the proportion parameter $p$ is proportional to 
+$$
+b(p) \propto p^{a-1} (1-p)^{b-1}, \ 0<p<1,
+$$
+where the hyperparameters of $a$ and $b$ are assumed given and they define the shape of the density. The simple code below plots beta density upon different parametrization schemes. It shows how rich the collection of shapes can be given different parameters.
+
+```{r eval = TRUE, echo = TRUE, tidy = TRUE}
+# short routine for parametrized beta density plotting
+betaDensPlot <- function(a, b, curveCol) {curve(dbeta(x,a,b), from = 0, to = 1, xlab = "p", ylab = "Density", lty = 1, lwd = 4, add = TRUE, col = curveCol)}
+# selection of parameters for beta density plots
+parametersMatrix <- matrix(c(3,7,2,7,2,1.8,2,1,2,0.8), 2, 5)
+# plot the curves
+
+curve(dbeta(x,3,9), from = 0, to = 1, xlab = "p", ylab = "Density", lty = 1, lwd = 4, main = "Beta density under different parametrization")
+curveColors <- c("red", "blue", "brown", "green", "orange")
+invisible(apply(matrix(1:dim(parametersMatrix)[2]), 1, function(i) {betaDensPlot(parametersMatrix[1,i], parametersMatrix[2,i], curveColors[i]) } ))
+legend("topright", c("a=3, b=9", "a=3, b=7", "a=2, b=7", "a=2, b=1.8", "a=2, b=1", "a=2, b=0.8"), lwd = rep(4,6), lty = rep(1,6), col = c("black", curveColors) )
+```
+
+Let's now get some Bayesian statistics done. Let's assume we need to solve the problem in which we need to estimate the proportion of an event which we call success For instance let's assume that a success is associated with a student studying more than $5$ hours a day in a library. Let's assume that we observe $30$ students from which $12$ study more than $5$ hours and $18$ less than $5$ hours. What would be the likelihood for such a situation. Well, it is a typical situation with a discrete variable $x$ which can be equal to $1$ with probability $p$ or to $0$ with probability $1-p$, depending if the students works more or less than $5$ hours. The likelihood function for a student is given by
+$$
+l(x) = p^x (1-p)^{1-x}.
+$$
+Thus, if a student works longer than $5$ hours, then $x=1$, and if shorter, then $x=0$. The likelihood for a single observation can basically be equal to $p$ or $1-p$, which is very logic as the probability of a randomly selected student to work more than $5$ hours is equal to $p$ and to belong to the group of the lazy ones to $1-p$.
+
+What is the likelihood for $n$ students? Apparently, due to the independence in the behaviour of the students, the likelihood for the entire population can simply be defined as a product of the likelihoods for the individual students. Thus we can state
+$$
+L(X) = \prod_{i=1}^n p^x_{i} (1-p)^{1-x_{i}},
+$$
+with $X = (x_1,x_2,\ldots, x_n)$. In case of our example with $12$ ambitious and $18$ lazy students, this likelihood results in 
+$$
+L(p) = p^{12} (1-p)^{18}.
+$$
+Please take into account that the function can now be defined as a function of $p$. In fact, please note that this likelihood is nothing else than the beta density that we have just introduced above, with $a=s+1=13$ and $b=f+1=19$. To keep the notation in order, we can replace the equality sign with the proportionality one
+$$
+L(p) \propto p^{12} (1-p)^{18}.
+$$
+If we were to put it in the general terms of an experiment which can result in a success or a failure, and denote by $s$ the number of successes and by $f$ the number of failures, we would obtain the likelihood in the following form
+$$
+L(p) \propto p^{s} (1-p)^{f}.
+$$
+What about combining the likelihood with the prior? Well, in Bayesian statistics, the standard approach is to work with the prior distribution which belong to the same family of distributions as the likelihood function. We have experienced that in post $1$, where both prior and likelihood were Normal. And then, the posterior has also been Normal. That is often referred to as conjugacy. In case of beta distribution the conjugate prior for our beta likelihood is beta distribution as well. Let's assume the prior is given by
+$$
+b(p)\propto p^{a-1} (1-p)^{b-1}.
+$$
+Then, if we go back to the definition of posterior as a product of prior and likelihood, we get
+$$
+b(p|data) \propto p^{a-1} (1-p)^{b-1} p^{s} (1-p)^{f} = p^{a+s-1} (1-p)^{b+f-1},
+$$
+which again defines a beta distribution. In this case it is parametrized with $a+s$ and $b+f$. We have just experienced a form of conjugacy in its purest form. The prior and the posterior distributions stem from the same distribution family and differ only with respect to the parameter values.
+
+Let us visualize this situation in form of the prior updating with the likelihood information. We assume that the shape of the prior density is determined by $a=3$ and $b=7$.
+```{r eval = TRUE, echo = TRUE, tidy = TRUE}
+# parameters of prior distribution
+a <- 3
+b<- 7
+# parameters of the likelihood
+s <- 12
+f <- 18
+curve(dbeta(x,a+s,b+f), from = 0, to = 1, xlab = "p", ylab = "Density", lty = 1, lwd = 4, main = "Prior updating and beta conjugacy")
+curve(dbeta(x,s+1,f+1), from = 0, to = 1, xlab = "p", ylab = "Density", lty = 2, lwd = 4, add = TRUE)
+curve(dbeta(x,a,b), from = 0, to = 1, xlab = "p", ylab = "Density", lty = 3, lwd = 4, add = TRUE)
+legend("topright", c("Prior", "Likelihood", "Posterior"), lty = c(3,2,1), lwd = c(3,3,3))
+```
+
+The shape of the posterior is much closer to the likelihood than to the prior, which seems natural and in line with the parameters. We have just seen, how easy it is to infer on the proportion if we deal with the information about it combined from two sources: some external source, which impacts our inference - prior, and internally collected data - likelihood.
+
+Now we make a step forward. We assume that our prior is not given in terms of a closed form distribution, but it is just defined in terms of some believes regarding probability of possible values.
+Let us assume that we have a vector of believes that proportions
+$$ 
+0.1, 0.2, 0.4, 0.5, 0.7
+$$
+are possible values for $p$. These values are assigned corresponding weights. For instance based on the frequency of observations of the proportions
+$$
+1,4,5,2,5.
+$$
+We can convert this vector into the vector of prior probabilities just by dividing each weight by the sum of them. Let us see that in action
+```{r eval = TRUE, echo = TRUE, tidy = TRUE}
+p = c(.1, .2, .4, .5, .7)
+priorProb <- c(1,4,5,2,5)
+priorProb <-  priorProb / sum(priorProb)
+plot(p, priorProb, type = "h", lwd = 5, xlab = "p", ylab = "Prior probability")
+```
+
+The figure shows the histogram of this distribution. This is a typical discrete distribution. How to input this knowledge into the analysis? Well, it is fairly simple. We just need to multiply those values with the corresponding values of likelihood function evaluated for the vector of believes with regards to proportion. Thus let us implement it:
+```{r eval = TRUE, echo = TRUE, tidy = TRUE}
+p <- c(.1, .2, .4, .5, .7)
+priorProb <- c(1,4,5,2,5)
+priorProb <-  priorProb / sum(priorProb)
+
+# parameters of the likelihood
+s <- 12
+f <- 18
+
+# evaluation of parameters for the believes
+like <- s * log(p) + f * log(1 - p)
+# compute the evaluations of posterior  
+product <- exp(like) * priorProb
+# make a proper denisty out of the posterior
+postProb = product / sum(product)
+
+library(lattice) # for plotting
+# data frame for prior
+prior <- data.frame("prior", p, priorProb)
+# data frame for posterior
+posterior <- data.frame("posterior", p, postProb)
+names(prior) <- c("type", "p", "probability")
+names(posterior) <- c("type", "p", "probability")
+
+# combining the information into one data frame
+data <- rbind(prior, posterior)
+# nice plot type
+xyplot(probability~p|type, data = data, layout = c(1,2), type = "h", lwd = 3, col = "black" )
+
+```
+
+The posterior is now discrete itself. We can see that despite of continuous likelihood, the discrete character of the prior leads to the discrete posterior. what is extremely useful, such an estimated posterior can now be used as a prior in the next sequence of the analysis, combining information from another subject. For instance, let us imagine that we have estimated the posterior of proportion of ambitious students at one univeristy. Now, we would like to repeat the same experiment at another one. The posterior, in the discrete form, that we have obtained at the first university can be used as a prior for the analysis at the second one. This way we combine more and more information form different sources. The discrete from of the posterior make it directly transferrable into a discrete prior. That is the way, the sensors data are combined in interent of things space and that's why the Bayesian statistics gets extremely popular in this space. But lets leave this for another post. The question for you: does it matter in which order we combine the know-how stemming from different universities? Is that exchangebale? 
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,14 @@
+---
+title: "abstract"
+author: "LGatarek"
+date: "1 października 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Cromolab creates statistical and technological infrastructure necessary to make effective investments in   cryptocurrencies. The platform is based on advanced econometrics methods developed by team of Cromolab. Cromolab follows a purely scientific approach combining advanced econometrics methods with up-to-date theory of financial mathematics and computational techniques.  The team consists of world class professors in the subjects of econometrics, finance and information technology, supported by PhDs and researchers in econometrics, machine learning, financial mathematics as well as IT. From statistical, econometric poind of view, the technology that we develop is based on a selection of papers published by memebrs of our team in the last few years. The main components of the methodology stem from [@vdb:13], [@gj:17], [@gvdha:16] and [@agh:17], but this list definitely is not exhaustive. Due to combinations of up-to-date methods sourced from a selection of fields in the contemporary econometrics, the resulting platform onstitute a coherent and complete investment analysis tool for cryptocurrency market. It covers entire chain of investment decision making process: signal processing, portfolio construction, risk analysis. | What is distinctive about this project is its innovative character in  terms of combining two spuriously opponent fields of econometrics into one coherent mechanism. We mean classical econometrics philosophy on one side, represented by leading world-class econometrician Prof. Johansen, and Bayesian econometric paradigm, represented by another leading worold-class econometrician Prod. Herman K. van Dijk. Bringing together classical, large sample based, econometric theory and the computational beauty of Bayesian, simulation based, approach to econometrics, position this project as one of the most innovative project on the ledger of modern econometric inference. The platform consists of a few components: 
+\newline
+- Trend signalling tool - identify the current trend in the market (rising or declining) for each cryptocurrency so that the investor can decide on the sign of position, she enters (long or short) in the underlying currency.| - Portfolio construction tool - designed to hedge the abovementioned position in the cryptocurrency with oppsite positions in other cryptocurrencies, statistically related to the underlying.
